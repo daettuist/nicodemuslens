@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>니고데모의 안경 렌즈 덱</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 1920×1080 무대를 화면에 맞춰 축소. 한 장 = 왼쪽 줄글 + 오른쪽 직접 해 보는 장치. 단일 테마(종이색 슬라이드 + 네이비 표지). */
+:root{
+  --paper:#F5F7FB; --card:#FFFFFF; --ink:#16233F; --muted:#5D6880; --line:#D9DFEA;
+  --navy:#16233F; --navy2:#22335A; --gold:#B0801F; --gold-l:#E2B85E; --gold-soft:#F5E9CC;
+  --f-display:"Gowun Batang","Nanum Myeongjo","Batang",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button,input{touch-action:manipulation}
+body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{height:100%}
+body{margin:0;background:#0B1222;color:var(--ink);font-family:var(--f-body);word-break:keep-all;overflow-wrap:break-word}
+.viewport{position:fixed;top:env(safe-area-inset-top,0px);right:env(safe-area-inset-right,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px);overflow:hidden;background:#0B1222}
+.stage{width:1920px;height:1080px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transform-origin:center center;background:var(--paper);overflow:hidden}
+.rotate{position:fixed;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#E2B85E;color:#16233F;font-size:15px;font-weight:600;border-radius:12px;padding:10px 12px 10px 16px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.rotate[hidden]{display:none}
+.rotate button{font:inherit;font-size:14px;border:1.5px solid #16233F;background:transparent;color:#16233F;border-radius:999px;padding:4px 12px;cursor:pointer}
+
+/* slide base */
+.slide{position:absolute;inset:0;padding:64px 104px 140px;display:none;font-size:29px;line-height:1.75}
+.slide.on{display:grid}
+.slide.dark{background:var(--navy);color:#EEF1F7}
+.slide h1,.slide h2,.slide h3{font-family:var(--f-display);font-weight:700;margin:0;line-height:1.35;text-wrap:balance}
+.slide p{margin:0}
+.kick{font-size:21px;font-weight:600;letter-spacing:.12em;color:var(--gold)}
+.dark .kick{color:var(--gold-l)}
+.head{display:grid;gap:8px;align-content:start}
+.head h2{font-size:56px}
+.two{grid-template-rows:auto 1fr;gap:40px}
+.cols{display:grid;grid-template-columns:660px 1fr;gap:72px;align-items:center;min-height:0}
+.prose{display:grid;gap:22px;align-content:center}
+.ref{font-size:.7em;color:var(--muted);white-space:nowrap}
+.dark .ref{color:#9FAAC0}
+.q{font-family:var(--f-display);font-size:31px;line-height:1.6;border-left:5px solid var(--gold);padding:4px 0 4px 26px}
+.note{font-size:21px;color:var(--muted)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px;display:grid;gap:20px}
+.btn{font:inherit;font-size:24px;font-weight:600;cursor:pointer;border-radius:999px;padding:12px 28px;border:2px solid var(--line);background:var(--paper);color:var(--ink)}
+.btn:hover{border-color:var(--gold)}
+.btn[aria-pressed="true"],.btn.sel{border-color:var(--gold);background:var(--gold-soft)}
+.btn:focus-visible,.navb:focus-visible,.flip:focus-visible,.ball:focus-visible,.jstep:focus-visible,.opt:focus-visible,.sc:focus-visible,.act.torn:focus-visible,.bean:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+.row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+
+/* action cue: 눌러 보기·끌어 보기 같은 행동 안내 */
+.cue{display:inline-flex;align-items:center;gap:14px;justify-self:start;background:var(--gold);color:#fff;font-size:24px;font-weight:600;line-height:1.45;border-radius:16px;padding:12px 22px 12px 16px;box-shadow:0 6px 16px rgba(176,128,31,.25);animation:cue 2.4s ease-in-out infinite}
+.cue .ci{width:30px;height:30px;flex:none}
+.dark .cue{background:var(--gold-l);color:var(--navy)}
+.cue.c{justify-self:center}
+@keyframes cue{0%,100%{box-shadow:0 6px 16px rgba(176,128,31,.25)}50%{box-shadow:0 6px 16px rgba(176,128,31,.25),0 0 0 8px rgba(226,184,94,.28)}}
+/* bottom bar */
+.bar{position:absolute;left:0;right:0;bottom:0;height:116px;padding:0 104px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-top:1px solid var(--line);background:var(--paper);z-index:3}
+.bar.dark{background:var(--navy);border-color:var(--navy2)}
+.tocb{font:inherit;font-size:26px;font-weight:600;cursor:pointer;border-radius:999px;padding:16px 32px;border:2px solid var(--line);background:transparent;color:var(--ink)}
+.tocb:hover{border-color:var(--gold)}
+.tocb:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.bar.dark .tocb{color:#fff;border-color:#3A4B73}
+.tocb[hidden]{display:none}
+.navs{margin-left:auto;display:flex;gap:20px;align-items:center;font-size:24px;color:var(--muted)}
+.navb{font:inherit;font-size:38px;font-weight:600;width:88px;height:88px;border-radius:50%;border:2px solid var(--line);background:transparent;color:inherit;cursor:pointer}
+.bar.dark .navb{border-color:#3A4B73;color:#fff}
+.navb{position:relative}
+.navb::after{content:"";position:absolute;inset:-18px}
+.navb:disabled{opacity:.3;cursor:default}
+
+/* cover */
+.cover{grid-template-columns:1fr 640px;align-items:center;gap:80px}
+.cover h1{font-size:92px;line-height:1.25}
+.cover .sub{font-size:31px;color:#C6CEDD;max-width:24em}
+.lensbig{position:relative;width:600px;height:600px;border-radius:50%;border:16px solid #EEF1F7;overflow:hidden;box-shadow:0 0 0 6px var(--navy2)}
+.lensbig svg,.lensbig canvas{position:absolute;inset:0;width:100%;height:100%}
+.lensbig canvas{touch-action:none;cursor:grab}
+.lenscap{position:absolute;left:0;right:0;bottom:70px;text-align:center;font-family:var(--f-display);font-size:40px;font-weight:700;color:var(--navy);text-shadow:0 2px 12px rgba(255,255,255,.8)}
+
+/* journey */
+.journey{display:grid;grid-template-columns:repeat(6,1fr);gap:24px;align-items:start}
+.jstep{all:unset;cursor:pointer;display:grid;justify-items:center;gap:16px;text-align:center}
+.jstep .ring{width:170px;height:170px;border-radius:50%;border:10px solid var(--navy);overflow:hidden;position:relative;background:#D7DFEB}
+.jstep .ring svg{width:100%;height:100%}
+.jstep b{font-family:var(--f-display);font-size:31px}
+.jstep span{font-size:20px;color:var(--muted)}
+.jstep em{font-style:normal;font-size:23px;line-height:1.5}
+.jstep:hover .ring{border-color:var(--gold)}
+
+/* dialogue */
+.talk{display:grid;gap:18px;align-content:start}
+.bub{max-width:88%;border-radius:22px;padding:18px 26px;font-size:26px;line-height:1.6;background:var(--card);border:1px solid var(--line)}
+.bub small{display:block;font-size:18px;color:var(--muted);margin-bottom:4px;font-weight:600}
+.bub.j{justify-self:end;background:var(--navy);color:#EEF1F7;border-color:var(--navy)}
+.bub.j small{color:var(--gold-l)}
+.bub.a{justify-self:center;background:var(--gold-soft);border-color:var(--gold);font-family:var(--f-display);font-size:28px;max-width:96%}
+.bub[hidden]{display:none}
+
+/* crises + ball */
+.crisis{display:grid;gap:20px}
+.cc{border-top:4px solid var(--ink);padding-top:14px;display:grid;gap:6px}
+.cc small{font-size:20px;color:var(--muted)}
+.cc b{font-family:var(--f-display);font-size:32px}
+.cc p{font-size:25px;line-height:1.65}
+.ball{all:unset;cursor:pointer;width:380px;height:240px;border-radius:50%;background:radial-gradient(ellipse at 40% 35%,#A9683A,#6E3E1E);position:relative;justify-self:center;transform:rotate(-14deg);box-shadow:0 18px 30px rgba(0,0,0,.18)}
+.ball::before{content:"";position:absolute;left:50%;top:50%;width:150px;height:6px;margin:-3px 0 0 -75px;background:#F3EDE4;border-radius:3px}
+.ball::after{content:"";position:absolute;left:50%;top:50%;width:150px;height:30px;margin:-15px 0 0 -75px;background:repeating-linear-gradient(90deg,transparent 0 18px,#F3EDE4 18px 22px);clip-path:inset(0 6px)}
+.ballsay{font-family:var(--f-display);font-size:38px;text-align:center;line-height:1.45;min-height:250px}
+#s4 .ball{width:300px;height:190px}
+#s4 .ball::before,#s4 .ball::after{width:120px;margin-left:-60px}
+
+/* flip cards */
+.flips{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.flips.five{grid-template-columns:repeat(6,1fr)}
+.flips.five .flip{grid-column:span 2}
+.flips.five .flip:nth-child(4){grid-column:2 / span 2}
+.flip{all:unset;cursor:pointer;perspective:1200px;height:230px;display:block}
+.flip .in{display:block;position:relative;width:100%;height:100%;transition:transform .6s;-webkit-transform-style:preserve-3d;transform-style:preserve-3d}
+.flip.open .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:20px;padding:22px 24px;display:grid;align-content:center;gap:8px}
+.flip .f{background:var(--card);border:2px solid var(--line);font-family:var(--f-display);font-size:26px;line-height:1.5}
+.flip .f small{font-family:var(--f-body);font-size:17px;color:var(--gold);font-weight:600;letter-spacing:.08em}
+.flip .b{background:var(--navy);color:#EEF1F7;transform:rotateY(180deg);font-size:23px;line-height:1.55}
+.flip .b b{font-family:var(--f-display);font-size:30px;color:var(--gold-l)}
+.flip:hover .f{border-color:var(--gold)}
+
+/* glasses widget */
+.glasses{width:100%;height:auto;display:block}
+.frame{fill:none;stroke:var(--navy);stroke-width:7;stroke-linecap:round}
+.scene{transition:filter .5s}
+.layer{opacity:0;transition:opacity .5s}
+.on-c .lc,.on-f .lf,.on-r .lr{opacity:1}
+.allv .layer{opacity:1}
+.view{border-radius:16px;background:#E6EBF4;padding:18px 24px;display:grid;gap:4px;min-height:150px;font-size:24px;line-height:1.6}
+.view b{font-family:var(--f-display);font-size:28px}
+.view.clear{background:var(--gold-soft)}
+.lensbtn i{display:inline-block;width:20px;height:20px;border-radius:50%;border:3px solid var(--muted);margin-right:10px;vertical-align:-2px}
+.lensbtn[aria-pressed="true"] i{border-color:var(--gold);background:var(--gold)}
+
+#s6 .box{gap:12px;padding:22px 26px}
+#s6 .glasses{max-height:300px}
+#s6 .view{min-height:0;font-size:23px}
+/* howto modes */
+#s7 .cols{align-items:start}
+#s7 .box{gap:16px;padding:24px}
+#s7 .view{min-height:0}
+.modestage{height:330px;border-radius:20px;background:#D7DFEB;position:relative;overflow:hidden;display:grid;place-items:center}
+.modestage svg{width:100%;height:100%}
+.wob{animation:wob 1.6s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:translate(0,0)}50%{transform:translate(14px,-6px)}}
+
+/* slider */
+.slider{width:100%;accent-color:var(--gold);height:40px}
+.sl-labels{display:flex;justify-content:space-between;font-size:22px;color:var(--muted)}
+.cmp{width:100%;border-collapse:collapse;font-size:20px;line-height:1.4}
+.cmp th,.cmp td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.cmp thead th{font-size:18px;color:var(--muted);font-weight:600}
+.cmp tbody th{font-family:var(--f-display);font-size:22px;white-space:nowrap}
+.cmp small{color:var(--muted);font-size:16px;margin-left:4px}
+.cmp td.same{font-size:18px;color:var(--gold);font-weight:600;border-left:3px solid var(--gold)}
+.cmp td.grow{font-size:18px;color:var(--ink);font-weight:600;border-left:3px solid var(--ink);background:#E6EBF4}
+#s8 .box{gap:14px;padding:24px}
+#s8 #city{max-height:330px}
+
+/* bean */
+.beanbox{position:relative;height:560px}
+.bean{all:unset;cursor:pointer;position:absolute;left:50%;top:50%;width:150px;height:110px;margin:-55px 0 0 -75px;border-radius:50% 50% 46% 54%/60% 60% 40% 40%;background:radial-gradient(ellipse at 35% 30%,#F3E3AE,#C9A65A);box-shadow:inset -8px -10px 0 rgba(0,0,0,.08);z-index:2;display:grid;place-items:center;font-size:20px;color:#5A431A;font-weight:600}
+.pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.2);opacity:0;transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .5s;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 18px;font-size:22px;white-space:nowrap}
+.beanbox.open .pill{opacity:1}
+.beanlines{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.beanlines line{stroke:#C9A65A;stroke-width:3}
+.pill{z-index:2}
+.bean{z-index:3}
+@keyframes draw{to{stroke-dashoffset:0}}
+.count{font-family:var(--f-display);font-size:30px;text-align:center}
+
+/* quiz */
+.opts{display:grid;gap:14px}
+.opt{all:unset;cursor:pointer;border:2px solid var(--line);background:var(--card);border-radius:18px;padding:16px 24px;font-size:25px;line-height:1.5;display:flex;gap:16px;align-items:flex-start}
+.opt span{font-family:var(--f-display);font-weight:700;color:var(--gold);min-width:1.2em}
+.opt:hover{border-color:var(--gold)}
+.opt.no{border-color:#C9CFDB;background:#EEF0F4}
+.opt.yes{border-color:var(--gold);background:var(--gold-soft)}
+.fb{min-height:150px;border-radius:16px;padding:18px 24px;background:#E6EBF4;font-size:24px;line-height:1.6}
+.fb b{font-family:var(--f-display);font-size:28px;display:block}
+
+/* rings */
+.ringwrap{display:grid;grid-template-columns:520px 1fr;gap:30px;align-items:center}
+.rings text{font-family:var(--f-body);font-size:20px;fill:var(--ink)}
+.rings circle{fill:none;stroke:var(--line);stroke-width:44;transition:stroke .5s}
+.rings circle.hot{stroke:#9AA2B4}
+.rings .core{fill:#9AA2B4;stroke:none}
+.remain{display:grid;gap:12px}
+.remain div{border:2px solid var(--gold);background:var(--gold-soft);border-radius:14px;padding:10px 18px;font-size:22px;line-height:1.5;opacity:0;transform:translateY(10px);transition:.5s}
+.remain.show div{opacity:1;transform:none}
+.remain b{font-family:var(--f-display)}
+
+/* scenarios */
+.scen{display:grid;gap:12px}
+.sc{all:unset;cursor:pointer;border:2px dashed var(--line);border-radius:16px;padding:12px 22px;font-size:24px;background:var(--card)}
+.sc:hover{border-color:var(--gold)}
+.sc.picked{border-style:solid;border-color:var(--ink);background:#E6EBF4}
+#s12 .box{gap:14px;padding:24px}
+#s12 .scen{gap:9px}
+#s12 .sc{font-size:22px;padding:9px 20px}
+#s12 .godway{font-size:22px;padding:18px 24px;min-height:230px}
+#s12 .godway b{font-size:28px}
+.godway{border-radius:18px;background:var(--navy);color:#EEF1F7;padding:22px 28px;font-size:25px;line-height:1.65;display:grid;gap:6px}
+.godway b{font-family:var(--f-display);font-size:32px;color:var(--gold-l)}
+
+/* road */
+.road svg{width:100%;height:auto;display:block}
+.keystrip{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;text-align:center;border:2px dashed var(--gold);border-radius:18px;padding:14px;font-size:22px}
+.keystrip b{font-family:var(--f-display);font-size:27px;display:block}
+.keystrip .ar{color:var(--gold);font-size:30px}
+
+/* seesaw */
+.seesaw svg{width:100%;height:auto}
+.tl text{font-family:var(--f-body);font-size:22px;fill:var(--ink)}
+.tl text.s{fill:var(--muted);font-size:18px}
+.tl text.dv{fill:var(--gold);font-size:22px;font-weight:600;letter-spacing:.06em}
+#s14 .box{gap:14px;padding:24px}
+#s14 .view{min-height:0}
+.par .f{font-size:39px}
+.par .f small{font-size:26px}
+
+/* acts */
+.acts{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.act{border-radius:16px;padding:18px 10px;text-align:center;background:var(--navy);color:#EEF1F7;font-family:var(--f-display);font-size:30px;font-weight:700;min-height:170px;display:grid;align-content:center;gap:6px}
+.act small{font-family:var(--f-body);font-size:17px;font-weight:400;color:#B9C3D6;line-height:1.4}
+.act.torn{all:unset;cursor:pointer;border-radius:16px;padding:18px 10px;text-align:center;font-family:var(--f-display);font-size:30px;font-weight:700;min-height:170px;display:grid;align-content:center;gap:6px;background:repeating-linear-gradient(-45deg,var(--card) 0 14px,#EEF0F4 14px 28px);border:3px dashed var(--gold);color:var(--ink)}
+.act.torn small{font-family:var(--f-body);font-size:17px;font-weight:400;color:var(--muted)}
+.act.torn.open{background:var(--gold-soft)}
+.brk{font-size:19px;font-weight:600;color:var(--navy);text-align:center;border-bottom:3px solid var(--navy);padding-bottom:6px;align-self:end;line-height:1.35}
+.brk.gap{color:var(--gold);border-color:var(--gold);border-bottom-style:dashed}
+.acts .act{min-height:140px}
+.ask{border-radius:18px;background:var(--gold-soft);border:2px solid var(--gold);padding:18px 24px;display:grid;gap:6px;font-size:25px;line-height:1.6}
+.ask[hidden]{display:none}
+.ask b{font-family:var(--f-display);font-size:27px;color:var(--gold)}
+.ask p{font-family:var(--f-display);font-size:29px;line-height:1.55}
+.walk3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.walk3 div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;display:grid;gap:4px;font-size:21px;line-height:1.55}
+.walk3 b{font-family:var(--f-display);font-size:26px}
+
+/* bookend */
+.pair{display:grid;grid-template-columns:1fr auto 1fr;gap:30px;align-items:center;justify-items:center}
+.pair .lensbig{width:400px;height:400px;border-width:12px}
+.pair .cap{font-family:var(--f-display);font-size:28px;text-align:center;margin-top:16px}
+.pair .ar{font-size:60px;color:var(--gold-l)}
+.pair .who{display:inline-block;margin-top:6px;font-size:40px;color:var(--gold-l)}
+.fogged svg{filter:blur(9px);transition:filter 1.6s}
+.fogged.cleared svg{filter:none}
+
+.onesent{border-radius:18px;background:var(--navy2);padding:20px 26px;font-family:var(--f-display);font-size:30px;line-height:1.6;color:#fff;display:grid;gap:4px}
+.onesent small{font-family:var(--f-body);font-size:18px;color:var(--gold-l);font-weight:600;letter-spacing:.1em}
+.endcap{font-family:var(--f-display);font-size:34px;color:var(--gold-l);text-align:center}
+#s19 .fogged svg{transition:filter 2.4s ease}
+/* recap */
+.recap{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 26px;display:grid;gap:6px;font-size:23px;line-height:1.55;align-content:start}
+.rc small{font-size:18px;color:var(--gold);font-weight:600;letter-spacing:.08em}
+.rc b{font-family:var(--f-display);font-size:30px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@page{size:1920px 1080px;margin:0}
+@media print{
+  body,.viewport{background:#fff;position:static;display:block}
+  .viewport{overflow:visible}
+  .stage{transform:none!important;height:auto;overflow:visible;background:none}
+  .slide{position:relative;display:grid!important;width:1920px;height:1080px;break-after:page}
+  .bar{display:none}.rotate{display:none}
+  .slide{padding-bottom:76px}
+}
+</style>
+</head>
+<body>
+
+<div class="viewport" id="vp">
+<div class="stage" id="stage">
+
+<!-- 1 cover -->
+<section class="slide dark cover" data-step="0" id="s1">
+  <div class="head" style="gap:28px">
+    <span class="kick">신국원 『니고데모의 안경』 · 흐름 지도 v10</span>
+    <h1>안경 하나를<br>맞추는 이야기</h1>
+    <p class="sub">흐린 눈에서 시작해 렌즈 세 개를 끼우고, 초점이 맞으면 하나님 나라가 보입니다. 이 책은 그 안경을 맞추고 쓰고 걷는 법을 가르칩니다.</p>
+    <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 렌즈를 마우스나 손가락으로 문질러 닦아 보세요</span></p>
+    <p class="note" style="color:#9FAAC0">다음 장으로 넘길 때는 오른쪽 아래 → 버튼이나 키보드 → 키를 씁니다.</p>
+  </div>
+  <div class="lensbig" id="coverLens">
+    <svg viewBox="0 0 220 220" class="allv" aria-hidden="true"></svg>
+    <div class="lenscap">하나님 나라가 보인다</div>
+    <canvas id="fog" width="600" height="600" aria-label="문질러 닦는 김 서린 렌즈"></canvas>
+  </div>
+</section>
+
+<!-- 2 journey -->
+<section class="slide two" data-step="0" id="s2">
+  <div class="head"><span class="kick">전체 여정</span><h2>책 열 장은 여섯 걸음으로 묶입니다</h2></div>
+  <div style="display:grid;gap:44px;align-content:center">
+    <div class="journey" id="journey"></div>
+    <p class="note" style="text-align:center">렌즈가 걸음마다 조금씩 맑아집니다.</p>
+    <p class="cue" style="justify-self:center"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>원하는 걸음을 누르면 그 장으로 바로 갑니다</span></p>
+  </div>
+</section>
+
+<!-- 3 nicodemus -->
+<section class="slide two" data-step="1" id="s3">
+  <div class="head"><span class="kick">첫째 걸음 · 서언</span><h2>밤에 찾아온 지식인</h2></div>
+  <div class="cols">
+    <div class="prose">
+      <p>요한복음 3장에서 니고데모는 밤에 예수님을 찾아옵니다. 존경받는 지식인이었지만 대화는 자꾸 엇갈립니다. 저자는 사마리아 여인보다도 말귀를 못 알아들었다고 꼬집습니다 <span class="ref">13쪽</span>.</p>
+      <p>왜 그랬을까요? 저자의 진단은 짧습니다. 니고데모는 하나님 나라를 볼 ‘눈’이 없었습니다. 훗날 예수님의 장례에 향품을 가져온 니고데모는 이미 그 안경을 쓰고 있었습니다.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 ‘대화 이어 보기’ 버튼을 눌러 보세요</span></p>
+    </div>
+    <div class="box">
+      <div class="talk" id="talk">
+        <div class="bub"><small>니고데모 · 요 3:2</small>랍비여 우리가 당신은 하나님께로서 오신 선생인 줄 아나이다</div>
+        <div class="bub j" hidden><small>예수 · 요 3:3</small>사람이 거듭나지 아니하면 하나님의 나라를 볼 수 없느니라</div>
+        <div class="bub" hidden><small>니고데모 · 요 3:4</small>사람이 늙으면 어떻게 날 수 있사옵나이까 두번째 모태에 들어갔다가 날 수 있사옵나이까</div>
+        <div class="bub a" hidden>“어머니 뱃속에 다시 들어갔다 나온다고 해결될 일이 아니었다. 그에게 필요한 것은 안목을 거듭나게 하는 복음의 안경이었다.” <span class="ref">저자 · 13쪽</span></div>
+      </div>
+      <div class="row"><button class="btn" id="talkNext">대화 이어 보기</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 our nicodemus -->
+<section class="slide two" data-step="1" id="s4">
+  <div class="head"><span class="kick">첫째 걸음 · 서언</span><h2>우리 곁의 니고데모</h2></div>
+  <div class="cols">
+    <div class="crisis">
+      <p>저자는 니고데모를 2천 년 전 인물로만 두지 않습니다. 1970–80년대를 산 한국의 그리스도인이 바로 니고데모였다고 말합니다 <span class="ref">14쪽</span>.</p>
+      <div class="cc"><small>그때 · 최루탄의 시절</small><b>신앙과 현실 사이에서 머뭇거림</b><p>세상이 바뀌어야 한다고 생각하면서도 행동하지 못했습니다. 개혁주의 세계관이 이들에게 “운동권과는 다른 방식으로 행한 현실 참여”의 길을 열었습니다 <span class="ref">14–15쪽</span>.</p></div>
+      <div class="cc"><small>한 세대 뒤</small><b>힘을 잃은 세계관 운동</b><p>거대한 이야기들이 흩어지는 시대에 운동은 진부해졌습니다. 저자의 처방은 기초로 돌아가는 것입니다 <span class="ref">15–16쪽</span>.</p></div>
+    </div>
+    <div class="box" style="justify-items:center">
+      <p class="note" style="text-align:center">미국 프로풋볼팀 그린베이의 감독은 경기에서 지면 다음 날 공을 들고 선수들 앞에 섰다고 합니다.</p>
+      <p class="cue" style="justify-self:center"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>공을 눌러 보세요 (두 번)</span></p>
+      <button class="ball" id="ball" aria-label="풋볼 공"></button>
+      <div class="ballsay" id="ballsay"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 window + five questions -->
+<section class="slide two" data-step="1" id="s5">
+  <div class="head"><span class="kick">첫째 걸음 · 1장 세계, 세계관 그리고 문화</span><h2>누구나 이미 창을 통해 봅니다</h2></div>
+  <div class="cols" style="grid-template-columns:600px 1fr">
+    <div class="prose">
+      <p>1장은 기독교 이야기를 꺼내기 전에 모든 사람의 이야기부터 합니다. 세상은 하나인데 보는 창이 달라서 사람마다 다르게 봅니다. 그 창이 세계관입니다 <span class="ref">19쪽</span>.</p>
+      <p>세계관은 세상을 이해하는 눈이면서 세상을 만드는 전략입니다. 그래서 사람은 본 대로 문화를 만듭니다 <span class="ref">27–28쪽</span>. 그리고 누구나 다섯 질문에 어떤 식으로든 답하며 삽니다 <span class="ref">20–21쪽</span>.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>카드를 눌러 뒤집어 보세요</span></p>
+      <p class="note">뒷면에 이 책의 몇 장이 그 질문에 답하는지 나옵니다. 질문과 장의 짝은 분석자가 정리했습니다.</p>
+    </div>
+    <div class="flips five" id="five"></div>
+  </div>
+</section>
+
+<!-- 6 fitting lenses -->
+<section class="slide two" data-step="2" id="s6">
+  <div class="head"><span class="kick">둘째 걸음 · 2장 기독교 세계관</span><h2>렌즈를 하나씩 끼워 보세요</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>사람이 만든 세계관은 모두 세상 안에 갇혀서 세상을 봅니다. 그래서 흐리고 비뚤게 보입니다 <span class="ref">43쪽</span>. 칼빈은 성경을 흐린 눈을 고치는 안경이라 불렀습니다.</p>
+      <p>저자는 이 안경에 렌즈가 셋 있다고 말합니다. 창조, 타락, 구속. 쌍안경이 볼록렌즈와 프리즘과 오목렌즈로 작동하듯, 셋이 함께 작동해야 제대로 보입니다 <span class="ref">45쪽</span>.</p>
+      <p class="q">“창조-타락-구속의 성경적 세계관을 통해서 세상을 보면 천국이 보인다.” <span class="ref">46쪽</span></p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 렌즈 버튼을 눌러 끼우고 빼 보세요</span></p>
+    </div>
+    <div class="box" style="gap:16px">
+      <svg class="glasses" id="g6" viewBox="0 0 600 270" role="img" aria-label="렌즈에 따라 풍경이 달라지는 안경"></svg>
+      <div class="row" id="lensBtns">
+        <button class="btn lensbtn" data-l="c" aria-pressed="false"><i></i>창조 렌즈</button>
+        <button class="btn lensbtn" data-l="f" aria-pressed="false"><i></i>타락 렌즈</button>
+        <button class="btn lensbtn" data-l="r" aria-pressed="false"><i></i>구속 렌즈</button>
+      </div>
+      <div class="view" id="view6" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 how to wear -->
+<section class="slide two" data-step="2" id="s7">
+  <div class="head"><span class="kick">둘째 걸음 · 2장 기독교 세계관</span><h2>안경을 제대로 쓰는 법</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>좋은 렌즈를 가졌다고 끝이 아닙니다. 저자는 안경을 잘못 쓰는 두 가지 방식을 경고합니다.</p>
+      <p>하나는 안경을 눈에 쓰지 않고 바라만 보는 것입니다. 다른 하나는 성경의 안경에 세상의 여러 관점을 함께 겹쳐 쓰는 것입니다. 저자는 노안 때문에 맞춘 다초점 안경으로 계단을 내려가다 어지러웠던 경험을 예로 듭니다 <span class="ref">47쪽</span>.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 세 버튼을 하나씩 눌러 비교해 보세요</span></p>
+    </div>
+    <div class="box">
+      <div class="row" id="modeBtns">
+        <button class="btn" data-m="look" aria-pressed="true">바라만 보기</button>
+        <button class="btn" data-m="multi" aria-pressed="false">다초점으로 쓰기</button>
+        <button class="btn" data-m="wear" aria-pressed="false">안경을 통해 바라보기</button>
+      </div>
+      <div class="modestage" id="modeStage"></div>
+      <div class="view" id="modeView"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 garden to city -->
+<section class="slide two" data-step="3" id="s8">
+  <div class="head"><span class="kick">셋째 걸음 · 창조 렌즈 · 3장 하나님의 창조 계획</span><h2>동산에서 도시로</h2></div>
+  <div class="cols" style="grid-template-columns:580px 1fr">
+    <div class="prose">
+      <p>창조는 끝이 아니라 시작이었습니다 <span class="ref">61쪽</span>. 저자는 성경의 처음 두 장과 마지막 두 장이 같은 장소를 그린다는 사실에 감탄합니다. 둘 다 강이 흐르고, 금과 보석이 있고, 생명나무가 있습니다.</p>
+      <p>가장 큰 차이는 에덴은 동산이고 새 예루살렘은 성(城)이라는 점입니다. 하나님이 지으신 세계는 자연의 모습에서 점점 문화의 모습을 띠어 갑니다 <span class="ref">60–61쪽</span>. 그 사이의 시간이 역사입니다.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 막대를 끌어 창세기에서 계시록으로 가 보세요</span></p>
+    </div>
+    <div class="box">
+      <svg id="city" viewBox="0 0 1000 520" style="width:100%;height:auto;border-radius:16px" aria-label="에덴 동산과 새 예루살렘"></svg>
+      <input type="range" min="0" max="100" value="0" class="slider" id="cityRange" aria-label="동산에서 도시로">
+      <div class="sl-labels"><span>에덴 동산 · 창세기 2장</span><span>새 예루살렘 · 요한계시록 21–22장</span></div>
+      <table class="cmp">
+        <thead><tr><th></th><th>창세기 · 에덴</th><th>계시록 · 새 예루살렘</th><th></th></tr></thead>
+        <tbody>
+          <tr><th>강</th><td>동산을 적시는 강 <small>창 2:10</small></td><td>생명수의 강 <small>계 22:1</small></td><td class="same" rowspan="2">같은 곳임을 알려 주는 실마리</td></tr>
+          <tr><th>생명나무</th><td>동산 가운데 <small>창 2:9</small></td><td>강 좌우에 <small>계 22:2</small></td></tr>
+          <tr><th>금과 보석</th><td>땅에서 나는 원석 <small>창 2:11–12</small></td><td>갈고 다듬어 꾸민 성 <small>계 21:18–21</small></td><td class="grow" rowspan="2">자연이 문화로 자람</td></tr>
+          <tr><th>모습</th><td>동산 (자연)</td><td>성 (문화)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 9 bean -->
+<section class="slide two" data-step="3" id="s9">
+  <div class="head"><span class="kick">셋째 걸음 · 창조 렌즈 · 3–4장</span><h2>규범 안의 넉넉한 놀이</h2></div>
+  <div class="cols" style="grid-template-columns:620px 1fr">
+    <div class="prose">
+      <p>창조에는 하나님의 질서가 있습니다. 그렇다고 그 질서가 우리를 꼼짝 못하게 묶는 굴레는 아닙니다. 저자는 창조 질서 안에 “창조적이며 자유로운 놀이의 여백”이 넉넉하다고 말합니다 <span class="ref">70쪽</span>.</p>
+      <p>4장은 사람이 바로 그 일을 맡은 존재라고 말합니다. 사람은 세상을 가꾸고 돌보며 그 안에 숨은 가능성을 펼치는 하나님의 동역자입니다. 아이가 레고 조각으로 성을 짓듯 말입니다 <span class="ref">79쪽</span>.</p>
+      <p class="q">“문화는 타락보다 앞선다. 문화의 기원은 창조에 있다.” <span class="ref">80쪽</span></p>
+    </div>
+    <div class="box">
+      <div class="beanbox" id="beanbox"><button class="bean" id="bean">콩</button></div>
+      <div class="count" id="beancount">콩을 눌러 보세요</div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 quiz -->
+<section class="slide two" data-step="3" id="s10">
+  <div class="head"><span class="kick">셋째 걸음 · 타락 렌즈 · 5장 악과 고통의 문제</span><h2>세상은 왜 이렇게 되었을까?</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>2004년 동남아 해일, 아들을 잃은 스승, 저자 가족의 투병. 5장은 악과 고통 앞에서 할 말을 잃는 장면으로 시작합니다 <span class="ref">88–89쪽</span>.</p>
+      <p>저자는 월터스의 구분을 빌려 답합니다. <b>구조</b>는 하나님이 세상을 만들고 운행하시는 방식이고, <b>방향</b>은 그 세상을 맡은 사람의 태도입니다 <span class="ref">91쪽</span>. 이 구분이 책 전체의 열쇠입니다.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 보기 중 저자의 답이라고 생각하는 것을 눌러 보세요</span></p>
+    </div>
+    <div class="box">
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb">하나를 고르면 저자의 설명이 나옵니다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 rings -->
+<section class="slide two" data-step="3" id="s11">
+  <div class="head"><span class="kick">셋째 걸음 · 타락 렌즈 · 6장 타락의 결과</span><h2>번진 얼룩, 그래도 남은 것</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>타락은 마음에서 시작해 관계와 노동과 자연과 문화까지 번집니다. 도예베르트는 이를 타락의 ‘우주적 영향’이라 불렀습니다 <span class="ref">111–113쪽</span>.</p>
+      <p>그런데 저자는 여기서 멈추지 않습니다. 악은 선한 구조를 바꾸지 못하고 그 위에 기생하며 비틀 뿐입니다 <span class="ref">114쪽</span>. 하나님은 타락한 세상을 그냥 두지 않으시고 일반 은총으로 붙드십니다 <span class="ref">115쪽</span>.</p>
+      <p class="q">“아침에 주의 인자하심을 나타내시며 밤마다 주의 성실하심을 베풂이 좋으니이다” <span class="ref">시 92:2 · 116쪽</span></p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 아래 두 버튼을 차례로 눌러 보세요</span></p>
+    </div>
+    <div class="box">
+      <div class="ringwrap">
+        <svg class="rings" id="rings" viewBox="0 0 520 520" aria-label="타락이 번지는 범위"></svg>
+        <div class="remain" id="remain">
+          <div><b>창조 질서</b> 땅이 있을 동안 심음과 거둠, 추위와 더위가 쉬지 않는다 (창 8:22) <span class="ref">117쪽</span></div>
+          <div><b>문화 명령</b> 홍수 뒤 노아에게 “생육하고 번성하라”를 다시 주심 (창 9:1) <span class="ref">117쪽</span></div>
+          <div><b>해와 비</b> 악인과 선인에게 똑같이 (마 5:45) <span class="ref">117쪽</span></div>
+          <div><b>가정과 국가의 법</b> 인류의 존속과 안정을 지키는 제도 <span class="ref">117쪽</span></div>
+        </div>
+      </div>
+      <div class="row"><button class="btn" id="spread">타락이 번지는 모습 보기</button><button class="btn" id="keep">그래도 남아 있는 것</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 worst option -->
+<section class="slide two" data-step="3" id="s12">
+  <div class="head"><span class="kick">셋째 걸음 · 구속 렌즈 · 7장 세상의 소망</span><h2>당신이 하나님이라면?</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>타락한 그날도 하나님은 늘 오시던 서늘한 때에 동산에 오셨습니다. “아담아, 네가 어디 있느냐”는 꾸짖음이 아니라 초청이었다고 저자는 읽습니다 <span class="ref">123쪽</span>.</p>
+      <p>하나님은 가죽옷을 지어 입히시고, 여자의 후손이 뱀의 머리를 부수리라는 첫 복음을 주셨습니다(창 3:15). 히엘레마는 이 방식이 정말 예상 밖이라고 말합니다 <span class="ref">125쪽</span>.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 다섯 가지 대응 중 하나를 눌러 보세요</span></p>
+      <p class="note">다섯 가지 대응은 책에 실린 상상입니다.</p>
+    </div>
+    <div class="box">
+      <div class="scen" id="scen"></div>
+      <div class="row" style="justify-content:flex-start"><button class="btn" id="reveal">하나님이 고르신 길 보기</button></div>
+      <div class="godway" id="godway"><b id="godhead">당신의 선택은?</b><span id="godtext">위의 다섯 가지 중 하나를 눌러 보세요.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 wheel alignment -->
+<section class="slide two" data-step="3" id="s13">
+  <div class="head"><span class="kick">셋째 걸음 · 구속 렌즈 · 8장 구속된 세상</span><h2>차를 부수지 말고 바퀴를 바로잡으세요</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>저자는 유학 시절 얻은 낡은 차로 뉴욕에 가다가 핸들이 비뚤어진 것을 알게 됩니다. 문제는 바퀴였습니다 <span class="ref">138쪽</span>. 차를 부수고 새로 만들 필요는 없었습니다. 바퀴만 바로잡으면 됩니다.</p>
+      <p>구속이 바로 그렇습니다. 카이퍼는 구속을 “삶의 바퀴를 바로잡는 것”이라 했습니다. 구속은 에덴으로 되돌아가는 일이 아니라, 하나님 나라를 향해 가던 길을 되찾는 일입니다 <span class="ref">139쪽</span>.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>‘바퀴 바로잡기’를 눌러 보세요</span></p>
+    </div>
+    <div class="box">
+      <div class="road"><svg id="road" viewBox="0 0 1000 300" aria-label="도로 위를 달리는 차"></svg></div>
+      <div class="row"><button class="btn" id="align">바퀴 바로잡기</button></div>
+      <div class="keystrip">
+        <div><b>선한 구조</b>창조 렌즈</div><span class="ar">→</span>
+        <div><b>틀어진 방향</b>타락 렌즈</div><span class="ar">→</span>
+        <div><b>바로잡힌 방향</b>구속 렌즈</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 focus -->
+<section class="slide two" data-step="4" id="s14">
+  <div class="head"><span class="kick">넷째 걸음 · 9장 하나님 나라의 내림</span><h2>초점이 맞으면 하나님 나라가 보입니다</h2></div>
+  <div class="cols" style="grid-template-columns:560px 1fr">
+    <div class="prose">
+      <p>세 렌즈로 본 세상, 그것이 하나님 나라입니다. 일제 강점기에도 국토와 국민은 있었지만 주권이 없었고, 광복은 그 주권을 되찾은 일이었습니다. 하나님 나라도 이 세상에 하나님의 주권이 회복되는 일입니다 <span class="ref">153–154쪽</span>.</p>
+      <p>그 나라는 이미 시작되었지만 아직 완성되지 않았습니다. 노르망디 상륙으로 승리는 정해졌지만 전쟁이 끝나기까지 1년이 더 걸린 것과 같습니다 <span class="ref">161–162쪽</span>.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 버튼으로 시소를 기울여 보세요</span></p>
+      <p class="note">초점이 한쪽으로 쏠리면 어떻게 되는지 보여 줍니다 <span class="ref">163–164쪽</span>.</p>
+    </div>
+    <div class="box">
+      <svg class="tl" viewBox="0 0 1000 200"style="width:100%;height:auto" aria-label="이미와 아직 사이">
+        <line x1="60" y1="80" x2="940" y2="80" stroke="#D9DFEA" stroke-width="8"/>
+        <line x1="180" y1="80" x2="600" y2="80" stroke="#B0801F" stroke-width="8"/>
+        <circle cx="180" cy="80" r="18" fill="#B0801F"/><circle cx="600" cy="80" r="12" fill="#16233F"/><circle cx="840" cy="80" r="18" fill="#FFFFFF" stroke="#B0801F" stroke-width="6"/>
+        <text x="180" y="40" text-anchor="middle">이미</text><text x="600" y="40" text-anchor="middle">지금 우리</text><text x="840" y="40" text-anchor="middle">아직</text>
+        <text x="180" y="124" text-anchor="middle" class="s">그리스도의 초림</text><text x="180" y="152" text-anchor="middle" class="s">1944. 6. 6. 노르망디 상륙</text><text x="180" y="186" text-anchor="middle" class="dv">D-Day</text>
+        <text x="600" y="124" text-anchor="middle" class="s">과도기</text>
+        <text x="840" y="124" text-anchor="middle" class="s">그리스도의 재림</text><text x="840" y="152" text-anchor="middle" class="s">1945. 5. 7. 승전</text><text x="840" y="186" text-anchor="middle" class="dv">V-Day</text>
+      </svg>
+      <div class="seesaw"><svg id="saw" viewBox="0 0 1000 200" aria-label="이미와 아직의 균형"></svg></div>
+      <div class="row" id="sawBtns">
+        <button class="btn" data-t="now" aria-pressed="false">‘이미’만 보기</button>
+        <button class="btn" data-t="both" aria-pressed="true">둘 다 보기</button>
+        <button class="btn" data-t="later" aria-pressed="false">‘아직’만 보기</button>
+      </div>
+      <div class="view" id="sawView"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 parables -->
+<section class="slide two" data-step="4" id="s15">
+  <div class="head"><span class="kick">넷째 걸음 · 9장 하나님 나라의 내림</span><h2>과도기를 사는 지혜, 천국 비유</h2></div>
+  <div class="cols" style="grid-template-columns:520px 1fr">
+    <div class="prose">
+      <p>저자는 예수님의 천국 비유에 ‘이미’와 ‘아직’ 사이를 살아갈 지혜가 담겨 있다고 봅니다 <span class="ref">165쪽</span>.</p>
+      <p>비유들은 짝을 이룹니다. 기다림과 일함, 작음과 큰 영향력, 발견과 헌신. 그리고 마지막 가라지 비유는 하나님이 왜 악을 당장 뽑지 않으시는지 보여 줍니다 <span class="ref">166–167쪽</span>.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>카드를 눌러 뒤집어 보세요</span></p>
+    </div>
+    <div class="flips" id="parables"></div>
+  </div>
+</section>
+
+<!-- 16 lost act -->
+<section class="slide two" data-step="5" id="s16">
+  <div class="head"><span class="kick">다섯째 걸음 · 10장 하나님 나라 백성의 삶</span><h2>잃어버린 5막을 연기하는 배우들</h2></div>
+  <div style="display:grid;grid-template-columns:560px 1fr;gap:72px;align-items:center">
+    <div class="prose">
+      <p>톰 라이트는 이런 상상을 합니다. 셰익스피어의 6막짜리 극본이 발견되었는데 5막만 첫 몇 쪽을 빼고 사라졌습니다. 배우들은 앞의 네 막과 마지막 막을 잘 읽고 5막을 연기해야 합니다 <span class="ref">175쪽</span>.</p>
+      <p>우리는 세상이 어떻게 여기까지 왔는지 알고, 어떻게 회복될지도 압니다. 그러나 눈앞의 삶은 그 사이에서 상상력을 가지고 살아 내야 합니다.</p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>찢어진 5막 카드를 눌러 보세요</span></p>
+    </div>
+    <div style="display:grid;gap:26px">
+      <div class="acts" id="acts">
+        <div class="brk" style="grid-column:1 / span 4">남아 있음 · 세상이 어떻게 여기까지 왔는지 안다</div>
+        <div class="brk gap">거의 사라짐</div>
+        <div class="brk">결말을 안다</div>
+        <div class="act">1막</div><div class="act">2막</div><div class="act">3막</div><div class="act">4막</div>
+        <button class="act torn" id="act5">5막<small>눌러 보세요</small></button>
+        <div class="act">6막</div>
+      </div>
+      <div class="ask" id="ask" hidden>
+        <b>5막 · 바로 지금, 우리가 연기하는 부분</b>
+        <p>처음(창조)과 끝(하나님 나라)을 아는 배우로서, 오늘 내가 선 자리에서 그 이야기에 어울리는 다음 장면은 무엇일까요?</p>
+      </div>
+      <div class="walk3">
+        <div><b>믿음·소망·인내</b>히브리서 11장의 사람들은 믿음으로 보이지 않는 것을 보았습니다 <span class="ref">174쪽</span></div>
+        <div><b>미리 맛보기</b>엿장수가 잘라 주던 엿 한 조각처럼, 그 나라를 이미 맛보며 삽니다 <span class="ref">177쪽</span></div>
+        <div><b>소명과 샬롬</b>자기 자리에서 문화를 바꾸고, 공의와 화평을 잣대로 삼습니다 <span class="ref">179–184쪽</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 bookend -->
+<section class="slide dark two" data-step="6" id="s17">
+  <div class="head"><span class="kick">여섯째 걸음 · 결언 우리 기독교 세계관 운동의 비전</span><h2>안경 쓴 니고데모</h2></div>
+  <div style="display:grid;grid-template-columns:600px 1fr;gap:72px;align-items:center">
+    <div class="prose">
+      <p>책의 처음에 안경이 필요했던 니고데모가 마지막에는 안경을 쓴 사람으로 돌아옵니다 <span class="ref">189쪽</span>. 저자는 이런 사람들이 히브리서 11장 순례자들의 뒤를 잇는다고 말합니다.</p>
+      <p>저자는 자신의 전통만 옳다고 고집하지 않습니다 <span class="ref">190쪽</span>. 다만 한국 교회가 성장에서 성숙으로 나아가고, “무례한 기독교”가 되지 않으면서 이 비전을 되찾기를 기도합니다 <span class="ref">196쪽</span>.</p>
+      <p class="q" style="border-color:var(--gold-l)">“내 맘의 주여 나의 비전이 되소서.” <span class="ref">198쪽</span></p>
+      <p class="cue"><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 7.5-6.2 1.6L10 18z" fill="currentColor"/><path d="M13 12l5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>오른쪽 렌즈 아래 버튼을 눌러 니고데모에게 안경을 씌워 보세요</span></p>
+    </div>
+    <div style="display:grid;gap:30px">
+      <div class="pair">
+        <div><div class="lensbig fogged" id="endA"><svg viewBox="0 0 220 220" class="allv" aria-hidden="true"></svg></div><div class="cap">안경이 필요한 사람<br><b class="who">니고데모</b></div></div>
+        <div class="ar" aria-hidden="true">→</div>
+        <div><div class="lensbig" id="endB"><svg viewBox="0 0 220 220" class="allv" aria-hidden="true"></svg></div><div class="cap">안경을 쓴 사람<br><b class="who">우리</b></div></div>
+      </div>
+      <div class="row"><button class="btn" id="wearBtn" style="background:transparent;color:#fff;border-color:#3A4B73">왼쪽 니고데모에게 안경 씌우기</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 recap -->
+<section class="slide two" data-step="0" id="s18">
+  <div class="head"><span class="kick">다시 보기</span><h2>여섯 걸음을 한 장에</h2></div>
+  <div class="recap" id="recap"></div>
+</section>
+
+<!-- 19 closing -->
+<section class="slide dark cover" data-step="0" id="s19">
+  <div class="head" style="gap:26px">
+    <span class="kick">마치며</span>
+    <h1 style="font-size:68px">니고데모의 안경은<br>이제 우리의 안경입니다</h1>
+    <p class="sub" style="font-size:28px">밤에 찾아와 “어떻게 그럴 수 있느냐”고 묻던 니고데모는 끝내 안경을 쓴 사람이 되었습니다. 이 책이 맞춰 준 안경도 바라만 보라고 있는 것이 아니라, 그 안경을 통해 세상을 보라고 있는 것입니다.</p>
+    <div class="onesent"><small>이 책을 한 문장으로</small>세상은 선하게 지어졌고, 방향이 틀어졌으며, 그리스도 안에서 바로잡히고 있다. 이 세 렌즈로 보면 하나님 나라가 보인다.</div>
+    <p class="q" style="border-color:var(--gold-l);font-size:27px">“너희 마음 눈을 밝히사 그의 부르심의 소망이 무엇이며…” <span class="ref">엡 1:18 · 저자의 마지막 기도 · 198쪽</span></p>
+  </div>
+  <div style="display:grid;justify-items:center;gap:26px">
+    <div class="lensbig fogged" id="endLens" style="width:520px;height:520px"><svg viewBox="0 0 220 220" class="allv" aria-hidden="true"></svg></div>
+    <p class="endcap">이제, 이 안경을 쓰고 세상을 보세요</p>
+  </div>
+</section>
+
+<div class="bar" id="bar">
+  <button class="tocb" id="toc">≡ 목차로</button>
+  <div class="navs"><span id="count"></span><button class="navb" id="prev" aria-label="이전 장">←</button><button class="navb" id="next" aria-label="다음 장">→</button></div>
+</div>
+</div>
+</div>
+<div class="rotate" id="rotateTip" hidden><span>휴대폰을 가로로 돌리면 더 크게 볼 수 있어요</span><button id="rotateX" aria-label="안내 닫기">닫기</button></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+document.documentElement.lang='ko';
+const stage=$('#stage');
+const vp=$('#vp');
+function fit(){const w=vp.clientWidth||innerWidth,h=vp.clientHeight||innerHeight;const s=Math.min(w/1920,h/1080);stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+  const tip=$('#rotateTip');if(tip&&!tipClosed)tip.hidden=!(h>w&&w<900);}
+let tipClosed=false;
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,250));
+if(window.visualViewport)visualViewport.addEventListener('resize',fit);
+
+/* ---------- scene (220×220) ---------- */
+function scene(){return `
+  <rect x="0" y="0" width="220" height="220" fill="#D7DFEB"/>
+  <rect x="0" y="150" width="220" height="70" fill="#9EA6B6"/>
+  <g class="layer lc">
+    <path d="M0 150 Q55 112 110 140 T220 128 V220 H0Z" fill="#7FA77A"/>
+    <path d="M0 175 Q70 150 140 172 T220 166 V220 H0Z" fill="#5E8B62"/>
+    <path d="M70 220 Q95 190 120 196 T160 176 L172 180 Q140 196 130 205 T96 220Z" fill="#8DB6DB"/>
+    <rect x="38" y="128" width="6" height="22" fill="#6B4E32"/><circle cx="41" cy="120" r="16" fill="#4E7E4F"/>
+  </g>
+  <g class="layer lf">
+    <rect x="0" y="0" width="220" height="220" fill="#2F3442" opacity=".28"/>
+    <ellipse cx="70" cy="46" rx="58" ry="22" fill="#4B5161"/><ellipse cx="128" cy="40" rx="50" ry="20" fill="#565C6D"/>
+    <path d="M150 150 L140 170 L152 182 L138 204" fill="none" stroke="#2A2D36" stroke-width="3"/>
+    <path d="M60 168 L72 186 L62 200" fill="none" stroke="#2A2D36" stroke-width="3"/>
+  </g>
+  <g class="layer lr">
+    <circle cx="172" cy="112" r="20" fill="#F2C66C"/>
+    <g stroke="#F2C66C" stroke-width="3" stroke-linecap="round"><line x1="172" y1="80" x2="172" y2="70"/><line x1="146" y1="92" x2="139" y2="85"/><line x1="198" y1="92" x2="205" y2="85"/><line x1="140" y1="114" x2="130" y2="114"/><line x1="204" y1="114" x2="214" y2="114"/></g>
+    <g fill="#C9A24A"><rect x="92" y="104" width="12" height="26"/><rect x="106" y="96" width="14" height="34"/><rect x="122" y="108" width="10" height="22"/><path d="M106 96 L113 86 L120 96Z"/></g>
+  </g>`;}
+// clear scenes (no fall layer) for cover / ending
+const clearScene=()=>scene().replace('class="layer lf"','class="layer lf" style="display:none"');
+$$('#coverLens svg, #endA svg, #endB svg, #endLens svg').forEach(s=>s.innerHTML=clearScene());
+
+/* ---------- slides & nav ---------- */
+const slides=$$('.slide');
+const STEPS=['흐린 눈','안경 맞추기','세 렌즈','초점','쓰고 걷기','안경 쓴 니고데모'];
+const firstOf=n=>slides.findIndex(s=>+s.dataset.step===n);
+let cur=0,endTimer=null,spreadT=null;
+function go(i){
+  i=Math.max(0,Math.min(slides.length-1,i));cur=i;
+  slides.forEach((s,k)=>s.classList.toggle('on',k===i));
+  const st=+slides[i].dataset.step, dark=slides[i].classList.contains('dark');
+  $('#bar').classList.toggle('dark',dark);
+  $('#toc').hidden=i<2;
+  $('#count').textContent=`${i+1} / ${slides.length}`;
+  $('#prev').disabled=i===0;$('#next').disabled=i===slides.length-1;
+  try{if(location.hash!=='#'+slides[i].id)history.replaceState(null,'','#'+slides[i].id);}catch(err){/* 미리보기·로컬 파일 등 주소를 바꿀 수 없는 환경 */}
+  roadActive(slides[i].id==='s13');
+  const el=$('#endLens');clearTimeout(endTimer);el.classList.remove('cleared');
+  if(slides[i].id==='s19')endTimer=setTimeout(()=>el.classList.add('cleared'),500);
+  if(slides[i].id!=='s11')clearInterval(spreadT);
+}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+$('#toc').onclick=()=>go(1);
+$('#rotateX').onclick=()=>{tipClosed=true;$('#rotateTip').hidden=true;};
+fit();
+let sx=null,sy=null;
+stage.addEventListener('touchstart',e=>{if(e.target.closest('button,input,canvas')){sx=null;return;}sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+stage.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;sx=null;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)go(cur+(dx<0?1:-1));},{passive:true});
+addEventListener('keydown',e=>{
+  if(e.target.matches('input'))return;
+  if(['ArrowRight','PageDown'].includes(e.key)){go(cur+1);e.preventDefault();}
+  if(['ArrowLeft','PageUp'].includes(e.key)){go(cur-1);e.preventDefault();}
+  if(e.key==='Home')go(0); if(e.key==='End')go(slides.length-1);
+});
+addEventListener('hashchange',()=>{const k=slides.findIndex(s=>'#'+s.id===location.hash);if(k>=0&&k!==cur)go(k)});
+
+/* ---------- 1 fog ---------- */
+(function(){
+  const cv=$('#fog'),ctx=cv.getContext('2d');
+  function paint(){
+    const g=ctx.createRadialGradient(300,300,40,300,300,320);
+    g.addColorStop(0,'rgba(214,220,232,.97)');g.addColorStop(1,'rgba(178,188,206,.98)');
+    ctx.globalCompositeOperation='source-over';ctx.fillStyle=g;ctx.fillRect(0,0,600,600);
+    for(let i=0;i<260;i++){ctx.fillStyle=`rgba(255,255,255,${Math.random()*.12})`;ctx.beginPath();ctx.arc(Math.random()*600,Math.random()*600,Math.random()*18+4,0,7);ctx.fill();}
+    ctx.fillStyle='rgba(22,35,63,.55)';ctx.font='600 30px "IBM Plex Sans KR",sans-serif';ctx.textAlign='center';ctx.fillText('문질러 닦아 보세요',300,310);
+  }
+  paint();
+  let down=false,last=null,touched=false;
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!touched)paint();});
+  const pt=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*600/r.width,(e.clientY-r.top)*600/r.height]};
+  function wipe(p){ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineWidth=90;ctx.beginPath();ctx.moveTo(...(last||p));ctx.lineTo(...p);ctx.stroke();last=p;}
+  cv.addEventListener('pointerdown',e=>{down=true;touched=true;last=null;try{cv.setPointerCapture(e.pointerId);}catch(err){}wipe(pt(e));});
+  // 누르고 문지르면 넓게, 마우스를 그냥 움직이면 가늘게 닦인다
+  cv.addEventListener('pointermove',e=>{if(down){wipe(pt(e));}else if(e.pointerType==='mouse'){touched=true;const p=pt(e);ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(p[0],p[1],34,0,7);ctx.fill();}});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t,()=>{down=false;last=null;}));
+})();
+
+/* ---------- 2 journey ---------- */
+const JQ=['우리는 무엇으로 세상을 보는가','어떤 안경이어야 하는가','렌즈마다 무엇이 보이는가','다 끼우면 무엇이 보이는가','그 안경을 쓰고 어떻게 사는가','이 비전을 어떻게 이어 가는가'];
+const JC=['서언·1장','2장','3–8장','9장','10장','결언'];
+$('#journey').innerHTML=STEPS.map((t,i)=>`<button class="jstep" data-go="${firstOf(i+1)}"><span class="ring"><svg viewBox="0 0 220 220" class="allv" style="filter:blur(${[8,6,4,2,1,0][i]}px)">${clearScene()}</svg></span><b>${t}</b><span>${JC[i]}</span><em>${JQ[i]}</em></button>`).join('');
+$('#journey').addEventListener('click',e=>{const b=e.target.closest('.jstep');if(b)go(+b.dataset.go)});
+
+/* ---------- 3 talk ---------- */
+(function(){const btn=$('#talkNext');btn.onclick=()=>{const hs=$('#talk').querySelectorAll('.bub[hidden]');
+  if(hs.length){hs[0].hidden=false;if(hs.length===1)btn.textContent='처음부터 다시';}
+  else{$$('#talk .bub').forEach((b,i)=>b.hidden=i>0);btn.textContent='대화 이어 보기';}};})();
+
+/* ---------- 4 ball ---------- */
+(function(){const say=$('#ballsay');let n=0;
+  const L=[
+   ['감독의 말','“제군들, 이것이 공이다.”','누가 그것이 공인 줄 모르겠습니까? 감독은 진 다음 날일수록 가장 기초부터 다시 훈련시켰습니다. 아무리 실력 있는 선수도 기본을 늘 연마해야 한다는 뜻입니다.'],
+   ['저자의 말','“여러분, 이것이 기독교 세계관입니다.”','저자도 같은 마음으로 이 책을 썼습니다. 힘을 잃은 세계관 운동이 다시 살아나는 길은 근본으로 돌아가 다시 시작하는 것입니다. 그래서 이 책은 새로운 이론이 아니라 기본을 다시 보여 줍니다.']];
+  $('#ball').onclick=()=>{const l=L[n%2];say.innerHTML=`<span class="kick" style="font-family:var(--f-body)">${l[0]}</span><br>${l[1]}<div style="font-family:var(--f-body);font-size:23px;line-height:1.6;color:var(--muted);margin-top:10px">${l[2]} <span class="ref">16쪽</span></div>`;n++;};})();
+
+/* ---------- 5 five questions ---------- */
+const FIVE=[
+ ['세상은 어디에서 왔으며, 어떻게 존재하게 되었나?','3장','완성을 향해 지어진 시작'],
+ ['인생은 어디에서 와서 어디로 가는가?','4장','세상을 가꾸는 하나님의 동역자'],
+ ['왜 세상은 이다지 고통과 죄악으로 가득한가?','5–6장','구조가 아니라 방향이 틀어졌다'],
+ ['구원이 실제로 있는지, 있다면 어떻게 가능한가?','7–8장','그리스도를 통해 방향을 되찾는다'],
+ ['사람은 무엇을 위해 살며, 세상과 역사의 목적은 무엇인가?','9–10장','하나님 나라와 그 백성의 삶']];
+$('#five').innerHTML=FIVE.map((q,i)=>`<button class="flip"><span class="in"><span class="f"><small>질문 ${i+1}</small>${q[0]}</span><span class="b"><b>${q[1]}</b>${q[2]}</span></span></button>`).join('');
+document.addEventListener('click',e=>{const f=e.target.closest('.flip');if(f)f.classList.toggle('open')});
+
+/* ---------- 6 lenses ---------- */
+const g6=$('#g6');
+const lensG=(cx,id)=>`<clipPath id="${id}"><circle cx="${cx}" cy="140" r="112"/></clipPath><g clip-path="url(#${id})"><g class="scene" transform="translate(${cx-110},30)">${scene()}</g></g>`;
+g6.innerHTML=`${lensG(160,'A1')}${lensG(440,'A2')}<circle class="frame" cx="160" cy="140" r="112"/><circle class="frame" cx="440" cy="140" r="112"/><path class="frame" d="M272 128 Q300 104 328 128"/><path class="frame" d="M48 118 L10 96"/><path class="frame" d="M552 118 L590 96"/>`;
+const MSG={
+ '':['렌즈가 없을 때','사람이 만든 세계관은 세상 안에 갇혀서 세상을 봅니다. 보이기는 하지만 흐리고 비뚤어집니다.','43쪽'],
+ 'c':['창조 렌즈만 끼우면','세상은 아름답지만 악과 고통을 설명하지 못합니다. 하나님이 세상을 만들고 손을 뗐다는 이신론에 가까워집니다.','46쪽'],
+ 'f':['타락 렌즈만 끼우면','어두운 면만 보입니다. 세상 자체를 부정하는 관점이 됩니다.','46쪽'],
+ 'r':['구속 렌즈만 끼우면','구원의 빛은 보이지만 발 디딜 땅이 없습니다. 세상이 왜 있는지, 역사가 무슨 의미인지 읽지 못합니다.','46쪽'],
+ 'cf':['창조와 타락만 끼우면','좋은 세상이 망가졌다는 것까지는 보입니다. 하지만 깊이 볼수록 세상은 더 암울해 보입니다. 7장은 바로 이 절망에서 출발합니다.','121쪽'],
+ 'cr':['창조와 구속만 끼우면','타락을 빼고 보면 세상을 지나치게 낙관하게 됩니다. 지금의 세상은 창조된 그대로가 아니기 때문입니다.','89쪽'],
+ 'fr':['타락과 구속만 끼우면','창조를 모르면 타락과 구속의 의미도 오해하기 쉽습니다. 무엇이 망가졌고 무엇을 회복하는지 알 수 없습니다.','55쪽'],
+ 'cfr':['세 렌즈를 모두 끼우면','“하나님 나라는 이 삼중의 성경적 진리를 통해 보는 세상이다.”','46쪽']};
+const ls={c:false,f:false,r:false};
+function lens6(){const key=['c','f','r'].filter(k=>ls[k]).join(''),n=key.length;
+  ['c','f','r'].forEach(k=>g6.classList.toggle('on-'+k,ls[k]));
+  g6.querySelectorAll('.scene').forEach(g=>g.style.filter=`blur(${[7,4,2,0][n]}px)`);
+  $$('#lensBtns .lensbtn').forEach(b=>b.setAttribute('aria-pressed',ls[b.dataset.l]));
+  const m=MSG[key],v=$('#view6');v.className='view'+(n===3?' clear':'');v.innerHTML=`<b>${m[0]}</b><span>${m[1]} <span class="ref">${m[2]}</span></span>`;}
+$('#lensBtns').addEventListener('click',e=>{const b=e.target.closest('.lensbtn');if(!b)return;ls[b.dataset.l]=!ls[b.dataset.l];lens6();});
+lens6();
+
+/* ---------- 7 modes ---------- */
+const MODES={
+ look:['바라만 보기','안경을 바라보기만 하면 세상은 보이지 않습니다. “성경을 아는 것은 꼭 필요하지만 그것만으로 충분하지 않다.” 안경사가 아니라면 늘 안경만 만지고 있을 이유는 없습니다.','44쪽'],
+ multi:['다초점으로 쓰기','성경의 안경에 세상의 여러 관점을 겹쳐 쓰면 초점이 여럿이 되어 어지럽습니다. 거룩/세속, 자연/은총처럼 세상을 둘로 나누는 이원론이 그렇습니다.','46–47쪽'],
+ wear:['안경을 통해 바라보기','“성경을 들여다보지 말고 양끝에 줄을 달아 눈에 쓰라.” 성경은 바라보는 책이 아니라 그것을 통해 보는 책입니다(뉴비긴). 안경이 투명할수록 세상이 잘 보입니다.','43–44쪽']};
+function modeArt(m){
+  if(m==='wear')return `<svg viewBox="0 0 1100 470" class="allv"><rect width="1100" height="470" fill="#D7DFEB"/><g transform="translate(110,10) scale(2.1)">${clearScene()}</g><g transform="translate(570,10) scale(2.1)">${clearScene()}</g></svg>`;
+  if(m==='multi')return `<svg viewBox="0 0 1100 470" class="allv"><rect width="1100" height="470" fill="#D7DFEB"/><g opacity=".55" class="wob"><g transform="translate(250,10) scale(2.1)">${clearScene()}</g></g><g opacity=".55"><g transform="translate(390,25) scale(2.1)" style="filter:blur(3px)">${clearScene()}</g></g></svg>`;
+  return `<svg viewBox="0 0 1100 470"><rect width="1100" height="470" fill="#C9D0DC"/><g transform="translate(550,235)"><circle cx="-150" cy="0" r="120" fill="#EEF2F8" stroke="#16233F" stroke-width="10"/><circle cx="150" cy="0" r="120" fill="#EEF2F8" stroke="#16233F" stroke-width="10"/><path d="M-30 -14 Q0 -40 30 -14" fill="none" stroke="#16233F" stroke-width="10"/><path d="M-210 -60 L-190 40" stroke="#FFFFFF" stroke-width="10" opacity=".7"/><path d="M90 -60 L110 40" stroke="#FFFFFF" stroke-width="10" opacity=".7"/><text x="0" y="190" text-anchor="middle" font-size="30" fill="#5D6880" font-family="IBM Plex Sans KR,sans-serif">안경만 보이고, 세상은 보이지 않는다</text></g></svg>`;}
+function mode(m){$$('#modeBtns .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));$('#modeStage').innerHTML=modeArt(m);const t=MODES[m];$('#modeView').innerHTML=`<b>${t[0]}</b><span>${t[1]} <span class="ref">${t[2]}</span></span>`;$('#modeView').className='view'+(m==='wear'?' clear':'');}
+$('#modeBtns').addEventListener('click',e=>{const b=e.target.closest('.btn');if(b)mode(b.dataset.m)});
+mode('look');
+
+/* ---------- 8 garden → city ---------- */
+$('#city').innerHTML=`
+ <rect width="1000" height="520" fill="#DCE6F2"/>
+ <rect y="330" width="1000" height="190" fill="#8DB07F"/>
+ <g id="cityG" opacity="0">
+   <rect y="330" width="1000" height="190" fill="#D8C9A0"/>
+   <rect x="80" y="170" width="840" height="170" fill="#E9D9A8" stroke="#B0801F" stroke-width="6"/>
+   ${[0,1,2,3,4,5].map(i=>`<rect x="${100+i*140}" y="120" width="60" height="220" fill="#F1E2B3" stroke="#B0801F" stroke-width="4"/><path d="M${100+i*140} 120 L${130+i*140} 80 L${160+i*140} 120Z" fill="#C9A24A"/>`).join('')}
+   ${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<rect x="${110+i*68}" y="${200+(i%3)*30}" width="18" height="18" fill="${['#7FB6C8','#C46A6A','#7FA77A','#9C7FC2'][i%4]}"/>`).join('')}
+   <rect x="440" y="230" width="120" height="110" rx="60" fill="#16233F"/>
+ </g>
+ <g id="gardenG">
+   ${[[90,300],[190,280],[290,310],[700,300],[800,285],[900,305],[150,360],[850,365]].map(([x,y])=>`<rect x="${x-5}" y="${y}" width="10" height="34" fill="#6B4E32"/><circle cx="${x}" cy="${y-6}" r="30" fill="#4E7E4F"/>`).join('')}
+   ${[[230,400],[330,430],[650,420],[760,440]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="9" fill="#E7B8C8"/><circle cx="${x+18}" cy="${y+6}" r="7" fill="#F2D27A"/>`).join('')}
+ </g>
+ <path d="M470 520 Q500 440 485 380 L515 380 Q530 440 530 520Z" fill="#7FB0DB"/>
+ <rect x="494" y="300" width="12" height="60" fill="#6B4E32"/><circle cx="500" cy="285" r="40" fill="#3F7A45"/>
+ <circle cx="488" cy="275" r="6" fill="#D9564F"/><circle cx="512" cy="292" r="6" fill="#D9564F"/>
+ ${[[380,470],[620,470],[420,500],[580,495]].map(([x,y])=>`<path d="M${x} ${y-12} L${x+10} ${y} L${x} ${y+12} L${x-10} ${y}Z" fill="#E2B85E" stroke="#B0801F" stroke-width="2"/>`).join('')}
+ <text x="500" y="60" text-anchor="middle" font-family="Gowun Batang,serif" font-size="34" fill="#16233F" id="cityT">에덴 동산</text>`;
+$('#cityRange').addEventListener('input',e=>{const t=e.target.value/100;$('#cityG').setAttribute('opacity',t);$('#gardenG').setAttribute('opacity',1-t);
+ $('#cityT').textContent=t<.35?'에덴 동산':t>.65?'새 예루살렘':'역사: 자연이 문화의 모습을 띠어 간다';});
+
+/* ---------- 9 bean ---------- */
+const BEANS=['콩나물국','된장','간장','청국장','두부','연두부','순두부','비지','콩자반','콩기름','섬유와 천','염색 방염제','신문 잉크'];
+const bb=$('#beanbox');
+bb.insertAdjacentHTML('afterbegin','<svg class="beanlines" id="beanlines"></svg>');
+bb.insertAdjacentHTML('beforeend',BEANS.map((b,i)=>`<span class="pill" data-i="${i}">${b}</span>`).join(''));
+const beanPos=i=>{const a=i/BEANS.length*Math.PI*2-Math.PI/2,r=i%2?250:180;return [Math.cos(a)*r*1.5,Math.sin(a)*r];};
+$('#bean').onclick=()=>{const open=!bb.classList.contains('open');bb.classList.toggle('open',open);
+  const W=bb.offsetWidth,H=bb.offsetHeight,cx=W/2,cy=H/2,ln=$('#beanlines');
+  ln.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  ln.innerHTML=open?BEANS.map((b,i)=>{const [dx,dy]=beanPos(i),len=Math.hypot(dx,dy);return `<line x1="${cx}" y1="${cy}" x2="${cx+dx}" y2="${cy+dy}" style="stroke-dasharray:${len};stroke-dashoffset:${len};animation:draw .6s ${i*40}ms ease forwards"/>`}).join(''):'';
+  $$('#beanbox .pill').forEach((p,i)=>{const [dx,dy]=beanPos(i);
+    p.style.transform=open?`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1)`:'translate(-50%,-50%) scale(.2)';
+    p.style.transitionDelay=open?(i*40)+'ms':'0ms';});
+  $('#beancount').innerHTML=open?'콩 하나로 열세 가지. “다 하나님이 허락하신 것이요 기뻐하실 일이다.” <span class="ref">70쪽</span>':'콩을 눌러 보세요';};
+
+/* ---------- 10 quiz ---------- */
+const OPTS=[
+ ['세상이 처음부터 구조적으로 결함이 있었다',0,'아닙니다.','저자는 죄와 악이 본래 구조적인 것이라는 주장을 “인간이 할 수 있는 최대의 변명”이라 부릅니다. 아담이 하와를, 하와가 뱀을 탓한 것이 그 원형입니다.','93쪽'],
+ ['환경과 사회, 팔자 탓이다',0,'아닙니다.','이것도 악을 구조 탓으로 돌리는 방식입니다. 오늘날 모든 문제를 “저놈들 때문”이라고 돌리는 태도도 같습니다.','91, 94쪽'],
+ ['하나님이 선악과라는 함정을 두셨다',0,'아닙니다.','선악과는 함정이 아니라 사람을 인격으로 대우하신 표지였습니다. 학생을 믿고 치르는 무감독 시험처럼, 성숙을 위한 장치였습니다.','97–99쪽'],
+ ['사람이 하나님 대신 스스로 법이 되려 했다',1,'맞습니다.','죄의 뿌리는 자율입니다. 구조는 그대로인데 방향이 틀어졌습니다. 아버지 차를 멋대로 몬다고 차가 자전거로 바뀌지는 않습니다.','92–95쪽']];
+$('#opts').innerHTML=OPTS.map((o,i)=>`<button class="opt" data-i="${i}"><span>${'가나다라'[i]}</span>${o[0]}</button>`).join('');
+$('#opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;const o=OPTS[b.dataset.i];
+  $$('#opts .opt').forEach(x=>x.classList.remove('yes','no'));b.classList.add(o[1]?'yes':'no');$('#fb').innerHTML=`<b>${o[2]}</b>${o[3]} <span class="ref">${o[4]}</span>`;});
+
+/* ---------- 11 rings ---------- */
+const RINGS=['마음 (지·정·의)','관계','노동과 땅','자연','문화'];
+$('#rings').innerHTML=RINGS.map((t,i)=>i===0?`<circle class="core" cx="260" cy="260" r="40" opacity=".35"/>`:`<circle cx="260" cy="260" r="${40+i*48}"/>`).join('')
+ + RINGS.map((t,i)=>`<text x="260" y="${i===0?266:260-(40+i*48)+7}" text-anchor="middle">${t}</text>`).join('');
+$('#spread').onclick=()=>{clearInterval(spreadT);const cs=$$('#rings circle');cs.forEach(c=>c.classList.remove('hot'));$('#rings .core').setAttribute('opacity','.35');let k=0;
+  spreadT=setInterval(()=>{if(k===0)$('#rings .core').setAttribute('opacity','1');else cs[k]&&cs[k].classList.add('hot');k++;if(k>=cs.length)clearInterval(spreadT);},450);};
+$('#keep').onclick=()=>$('#remain').classList.toggle('show');
+
+/* ---------- 12 scenarios ---------- */
+const SC=['“기회를 한번 더 줄 테니 잘해 볼 수 있겠지?”','“창조 실험은 실패로 돌아갔어. 다 집어치우자.”','“처음 하는 일이라 잘못되었으니 모조리 걷어치우고 새로 시작해 보자.”','“모두가 저 뱀 탓이다. 저 놈만 없애고 너희에게 새로 기회를 주겠다.”','“멋대로 하겠다는 거지. 잘해 보라구. 나는 상관하지 않을 테니.”'];
+$('#scen').innerHTML=SC.map((s,i)=>`<button class="sc" data-i="${i}">${s}</button>`).join('');
+$('#scen').addEventListener('click',e=>{const b=e.target.closest('.sc');if(!b)return;
+  $$('#scen .sc').forEach(x=>x.classList.toggle('picked',x===b));$('#reveal').classList.remove('sel');
+  $('#godhead').textContent='당신이 고른 대응';
+  $('#godtext').innerHTML=`${SC[b.dataset.i]}<br><b style="font-size:28px">이것은 하나님이 고르신 길이 아닙니다.</b> 저자는 이런 상상이 “어느 것도 하나님의 성품에 부합하지 않으며 따라서 가능하지 않은 일”이라고 말합니다. <span class="ref" style="color:#9FAAC0">125쪽</span><br>다른 대응도 골라 보고, 아래 버튼으로 하나님이 고르신 길을 확인해 보세요.`;});
+$('#reveal').onclick=()=>{$$('#scen .sc').forEach(x=>x.classList.remove('picked'));$('#reveal').classList.add('sel');
+  $('#godhead').textContent='하나님이 고르신 길: 최악의 대안';
+  $('#godtext').innerHTML=`하나님은 상상할 수 있는 가장 어려운 길을 고르셨습니다. 일을 망쳐 놓은 장본인인 사람을 버리지 않고 다시 동역자로 삼아, 박살 난 경주용 자동차를 사고 전보다 더 좋게 복원하시는 길입니다. 그 일에 필요한 것은 후원자 아들의 생명이었습니다. <span class="ref" style="color:#9FAAC0">125–126쪽</span>`;};
+
+/* ---------- 13 road ---------- */
+const road=$('#road');
+road.innerHTML=`<rect width="1000" height="300" fill="#8DB07F"/><rect y="100" width="1000" height="100" fill="#5D6470"/>
+ ${[...Array(10)].map((_,i)=>`<rect x="${i*110+20}" y="146" width="60" height="8" fill="#F5F7FB"/>`).join('')}
+ <g id="car"><rect x="-40" y="-20" width="80" height="40" rx="10" fill="#B0801F"/><rect x="-10" y="-16" width="26" height="32" rx="5" fill="#E6EBF4"/>
+ <rect x="-34" y="-26" width="16" height="8" fill="#16233F"/><rect x="18" y="-26" width="16" height="8" fill="#16233F"/><rect x="-34" y="18" width="16" height="8" fill="#16233F"/><rect x="18" y="18" width="16" height="8" fill="#16233F"/></g>
+ <text x="500" y="270" text-anchor="middle" font-family="IBM Plex Sans KR,sans-serif" font-size="26" fill="#16233F" id="roadT">바퀴가 비뚤어져 자꾸 길 밖으로 벗어납니다</text>`;
+// drift: 1이면 비뚤어진 바퀴, 0이면 바로잡힌 바퀴. 바로잡으면 서서히 0으로 줄어 차가 차선으로 자연스럽게 돌아온다
+let aligned=false,raf=null,x=0,drift=1,py=150;
+function frame(){x+=4;if(x>1060){x=-60;py=150;}
+  drift+=((aligned?0:1)-drift)*0.025;
+  const t=Math.max(0,x)/1000;
+  let off=190*t*t*drift;
+  const y=Math.min(150+off,280);
+  const ang=Math.atan2(y-py,4)*180/Math.PI;py=y;
+  $('#car').setAttribute('transform',`translate(${x},${y}) rotate(${Math.max(-40,Math.min(40,ang))})`);raf=requestAnimationFrame(frame);}
+function roadActive(on){cancelAnimationFrame(raf);raf=null;
+  if(on){if(matchMedia('(prefers-reduced-motion: reduce)').matches){$('#car').setAttribute('transform',`translate(500,${aligned?150:200}) rotate(${aligned?0:12})`);}else frame();}}
+$('#align').onclick=()=>{aligned=!aligned;$('#align').textContent=aligned?'다시 비뚤어지게':'바퀴 바로잡기';
+  $('#roadT').textContent=aligned?'차는 그대로, 방향만 바로잡혔습니다':'바퀴가 비뚤어져 자꾸 길 밖으로 벗어납니다';
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)roadActive(true);};
+
+/* ---------- 14 seesaw ---------- */
+const SAW={
+ now:[-12,'‘이미’만 보면','지금 여기서 혁명으로 천국을 이루려 하게 됩니다. 1534년 뮌스터를 ‘새 예루살렘’이라 선포한 재세례파의 비극이 그 예입니다.','163–164쪽'],
+ both:[0,'둘 다 보면','완성을 기다리면서 오늘 할 일을 합니다. “내일 재림이 있을지라도 오늘 한 그루의 사과나무를 심겠다.”','163쪽'],
+ later:[12,'‘아직’만 보면','이 세상을 내세를 위한 대기실로만 여기게 됩니다. “그 날과 그 시”를 예고하는 시한부 종말론이 그 극단입니다.','163쪽']};
+function saw(k){const s=SAW[k];$$('#sawBtns .btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===k));
+  $('#saw').innerHTML=`<path d="M470 190 L500 140 L530 190Z" fill="#16233F"/><g transform="rotate(${s[0]} 500 135)" style="transition:transform .5s"><rect x="150" y="128" width="700" height="14" rx="7" fill="#B0801F"/>
+   <circle cx="200" cy="100" r="28" fill="#F5E9CC" stroke="#B0801F" stroke-width="4"/><text x="200" y="108" text-anchor="middle" font-size="22" font-family="Gowun Batang,serif" fill="#16233F">이미</text>
+   <circle cx="800" cy="100" r="28" fill="#FFFFFF" stroke="#B0801F" stroke-width="4"/><text x="800" y="108" text-anchor="middle" font-size="22" font-family="Gowun Batang,serif" fill="#16233F">아직</text></g>`;
+  $('#sawView').innerHTML=`<b>${s[1]}</b><span>${s[2]} <span class="ref">${s[3]}</span></span>`;$('#sawView').className='view'+(k==='both'?' clear':'');}
+$('#sawBtns').addEventListener('click',e=>{const b=e.target.closest('.btn');if(b)saw(b.dataset.t)});saw('both');
+
+/* ---------- 15 parables ---------- */
+const PAR=[
+ ['열 처녀','기다림','더디 오는 나라를 기다리는 자세. 정적인 비유입니다. (마 25:1–13)'],
+ ['달란트','일함','이미 주어진 나라를 위해 일하는 자세. 열 처녀와 짝을 이루는 동적인 비유입니다. (마 25:14–30)'],
+ ['겨자씨','자람','작지만 강한 생명력으로 자라 결국 새들이 깃드는 나무가 됩니다. (마 13:31–32)'],
+ ['누룩','스며듦','한 숟갈의 누룩이 가루 서 말 전체를 부풀립니다. 세상 전체를 바꾸는 힘입니다. (마 13:33)'],
+ ['보화와 진주','헌신','숨은 보물을 발견한 사람은 그것을 얻으려고 무엇이든 감수합니다. (마 13:44–46)'],
+ ['가라지','인내','하나님은 왜 가라지를 당장 뽑지 않으실까? “오늘 밤 하나님이 모든 가라지를 뽑으시면 당신은 내일 아침 살아 있을 자신이 있는가.” (마 13:24–30)']];
+$('#parables').innerHTML=PAR.map(p=>`<button class="flip par" style="height:250px"><span class="in"><span class="f"><small>${p[1]}</small>${p[0]}</span><span class="b" style="font-size:21px">${p[2]}</span></span></button>`).join('');
+
+/* ---------- 16 act 5 ---------- */
+$('#act5').onclick=()=>{const a=$('#act5');const o=a.classList.toggle('open');a.innerHTML=o?'5막<small>지금 우리</small>':'5막<small>눌러 보세요</small>';$('#ask').hidden=!o;};
+
+/* ---------- 17 wear ---------- */
+$('#wearBtn').onclick=()=>{const e=$('#endA');const c=e.classList.toggle('cleared');$('#wearBtn').textContent=c?'다시 흐리게':'왼쪽 니고데모에게 안경 씌우기';};
+
+/* ---------- 18 recap ---------- */
+const RC=[
+ ['흐린 눈','서언·1장','누구나 창을 통해 세상을 봅니다. 그 창이 흐리다는 것이 문제입니다.'],
+ ['안경 맞추기','2장','성경이라는 교정 안경. 창조·타락·구속 세 렌즈를 함께 써야 합니다.'],
+ ['세 렌즈','3–8장','선한 구조, 틀어진 방향, 그리고 그리스도를 통해 바로잡힌 방향.'],
+ ['초점','9장','초점이 맞으면 하나님 나라가 보입니다. 이미 시작되었고 아직 완성을 기다립니다.'],
+ ['쓰고 걷기','10장','잃어버린 5막을 사는 사람들. 믿음·소망·인내, 소명과 샬롬.'],
+ ['안경 쓴 니고데모','결언','안경을 쓴 사람들의 공동체. “나의 비전이 되소서.”']];
+$('#recap').innerHTML=RC.map((r,i)=>`<div class="rc"><small>${i+1} · ${r[1]}</small><b>${r[0]}</b>${r[2]}</div>`).join('');
+
+/* start */
+const k0=slides.findIndex(s=>'#'+s.id===location.hash);go(k0>=0?k0:0);
+})();
+</script>
+
+</body>
+</html>
